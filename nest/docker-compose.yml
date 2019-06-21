@@ -1,0 +1,44 @@
+version: '3'
+services:
+  nginx: 
+    restart: always
+    image: nginx:latest
+    container_name: production_nginx
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+    ports:
+      - 80:80
+      - 443:443
+    depends_on:
+      - secretsquirrel_nest
+      - mongo
+    networks:
+      - nuttyNetwork
+  secretsquirrel_nest:
+    restart: always
+    build: .
+    container_name: secretsquirrel_nest
+    expose:
+      - "8000"
+    networks:
+      - nuttyNetwork
+    depends_on:
+      - mongo
+  secretsquirrel_nut:
+    restart: always
+    build: "../nut"
+    container_name: secretsquirrel_nut
+    expose:
+      - "8080"
+    networks:
+      - nuttyNetwork
+    depends_on:
+      - mongo
+      - secretsquirrel_nest
+  mongo:
+    image: 'mongo:3.4.1'
+    container_name: 'datastore'
+    ports:
+      - '27017:27017'
+networks:
+  nuttyNetwork:
